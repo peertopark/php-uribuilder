@@ -107,7 +107,8 @@ class UriBuilder {
      * @return Query
      */
     public function get_query() {
-        return new Query($this->get_component(URI_QUERY));
+        $queryString = $this->get_component(URI_QUERY);
+        return new Query($queryString);
     }
 
     /**
@@ -115,7 +116,7 @@ class UriBuilder {
      * @return string
      */
     public function get_query_string() {
-        return (string) $this->get_query();
+        return $this->get_query()->getContent();
     }
 
     /**
@@ -159,9 +160,6 @@ class UriBuilder {
     }
 
     public function set_query_array($query_array) {
-        foreach ($query_array as $key => $value) {
-            
-        }
         $query = Query::createFromPairs($query_array);
         return $this->set_query($query);
     }

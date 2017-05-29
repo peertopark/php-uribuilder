@@ -34,6 +34,12 @@ class UriBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expected, $string);
     }
     
+    public function test_build_http_string_with_query() {
+        $expected = "https://www.peertopark.com?returnUrl=https%3A%2F%2Fwww.google.es&key=value";
+        $string = UriBuilder::init($expected)->build_http_string();
+        $this->assertNotNull($string);
+        $this->assertEquals($expected, $string);
+    }
     
     public function test_get_components() {
         $components = UriBuilder::init("https://www.peertopark.com/home/show?query=value&key=value")->get_components();
@@ -72,14 +78,14 @@ class UriBuilderTest extends PHPUnit_Framework_TestCase {
     }
     
     public function test_get_query() {
-        $query = UriBuilder::init("https://www.peertopark.com/home/show?query=value&key=value")->get_query();
+        $query = UriBuilder::init("https://www.peertopark.com?returnUrl=https%3A%2F%2Fwww.google.es%3FreturnUrl%3Dhttps%253A%252F%252Fwww.google.es&test=true")->get_query();
         $this->assertNotNull($query);
     }
     
     public function test_get_query_string() {
-        $query = UriBuilder::init("https://www.peertopark.com/home/show?query=value&key=value")->get_query_string();
+        $query = UriBuilder::init("https://www.peertopark.com?returnUrl=https%3A%2F%2Fwww.google.es%3FreturnUrl%3Dhttps%253A%252F%252Fwww.google.es&test=true")->get_query_string();
         $this->assertNotNull($query);
-        $this->assertEquals("query=value&key=value", $query);
+        $this->assertEquals("returnUrl=https://www.google.es?returnUrl=https%253A%252F%252Fwww.google.es&test=true", $query);
     }
     
     public function test_has_query_param() {
@@ -90,9 +96,10 @@ class UriBuilderTest extends PHPUnit_Framework_TestCase {
     }
     
     public function test_get_query_param() {
-        $builder = UriBuilder::init("https://www.peertopark.com/home/show?query=value&key=value");
+        $builder = UriBuilder::init("https://www.peertopark.com/home/show?query=value&key=value&returnUrl=https%3A%2F%2Fwww.google.es%3FreturnUrl%3Dhttps%253A%252F%252Fwww.google.es");
         $this->assertEquals("value",$builder->get_query_param("query"));
         $this->assertEquals("value", $builder->get_query_param("key"));
+        $this->assertEquals("https://www.google.es?returnUrl=https://www.google.es", $builder->get_query_param("returnUrl"));
         $this->assertNull($builder->get_query_param("value"));
     }
     
@@ -152,7 +159,7 @@ class UriBuilderTest extends PHPUnit_Framework_TestCase {
         $query = $builder->get_query_string();
         $this->assertNotNull($query);
         $this->assertEquals("returnUrl=https://www.google.es", $query);
-        $this->assertEquals("https://www.peertopark.com?returnUrl=https%3A%2F%2Fwww.google.es", $builder->build_http_string());
+        $this->assertEquals("https://www.peertopark.com?returnUrl=https://www.google.es", $builder->build_http_string());
     }
     
     public function test_set_query_param_is_url() {
@@ -160,6 +167,22 @@ class UriBuilderTest extends PHPUnit_Framework_TestCase {
         $query = $builder->get_query_string();
         $this->assertNotNull($query);
         $this->assertEquals("url=https://www.peertopark.com", $query);
-        $this->assertEquals("https://www.peertopark.com?url=https%3A%2F%2Fwww.peertopark.com", $builder->build_http_string());
+        $this->assertEquals("https://www.peertopark.com?url=https://www.peertopark.com", $builder->build_http_string());
     }
+    
+    public function test_build_tree() {
+        $builder = UriBuilder::init("https://www.peertopark.com")->set_query_param("url", "child")->append_query_param("return", "https://www.peertopark.com");
+        $childUrl = $builder->build_http_string();
+        $this->assertNotNull($childUrl);
+        $this->assertEquals("https://www.peertopark.com?url=child&return=https://www.peertopark.com", $childUrl);
+        
+        $parentUrl = $builder->set_query_param("url", "parent")->append_query_param("return", $childUrl)->build_http_string();
+        $this->assertNotNull($parentUrl);
+        $this->assertEquals("https://www.peertopark.com?url=parent&return=https://www.peertopark.com?url=child%26return=https://www.peertopark.com", $parentUrl);
+        
+        $this->assertEquals("parent", $builder->get_query_param("url"));
+        $this->assertEquals("https://www.peertopark.com?url=child&return=https://www.peertopark.com", $builder->get_query_param("return"));
+    }
+    
+    
 }
