@@ -2,6 +2,7 @@
     "name": "peertopark/uribuilder",
     "description": "Peer to Park UriBuilder",
     "type": "library",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Hector Espert",
