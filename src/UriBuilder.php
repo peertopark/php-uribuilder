@@ -159,6 +159,9 @@ class UriBuilder {
     }
 
     public function set_query_array($query_array) {
+        foreach ($query_array as $key => $value) {
+            
+        }
         $query = Query::createFromPairs($query_array);
         return $this->set_query($query);
     }
@@ -167,6 +170,7 @@ class UriBuilder {
         $query_array = [$param => $value];
         return $this->set_query_array($query_array);
     }
+   
 
     public function append_query_raw($raw_query = NULL) {
         $queryComponent = new Query($raw_query);

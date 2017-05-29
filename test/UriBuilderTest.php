@@ -146,4 +146,20 @@ class UriBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("query=value&key=value", $query);
         $this->assertEquals("https://www.peertopark.com/home/show?query=value&key=value", $builder->build_http_string());
     }
+    
+    public function test_set_raw_query_contains_url() {
+        $builder = UriBuilder::init("https://www.peertopark.com")->set_raw_query("returnUrl=https%3A%2F%2Fwww.google.es");
+        $query = $builder->get_query_string();
+        $this->assertNotNull($query);
+        $this->assertEquals("returnUrl=https://www.google.es", $query);
+        $this->assertEquals("https://www.peertopark.com?returnUrl=https%3A%2F%2Fwww.google.es", $builder->build_http_string());
+    }
+    
+    public function test_set_query_param_is_url() {
+        $builder = UriBuilder::init("https://www.peertopark.com")->set_query_param("url", "https://www.peertopark.com");
+        $query = $builder->get_query_string();
+        $this->assertNotNull($query);
+        $this->assertEquals("url=https://www.peertopark.com", $query);
+        $this->assertEquals("https://www.peertopark.com?url=https%3A%2F%2Fwww.peertopark.com", $builder->build_http_string());
+    }
 }
